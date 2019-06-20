@@ -17,6 +17,7 @@ const getList = (author, keyword) => {
 /**
  * 获取详情
  * @param {Number} id 
+ * @returns {Promise}
  */
 const getDetail = id => {
   return {
@@ -33,6 +34,7 @@ const getDetail = id => {
  * @param {Object} data 
  * @param {String} title 
  * @param {String} content 
+ * @returns {Promise}
  */
 const newBlog = (data = {}) => {
   // console.log('data: ', data)
@@ -45,6 +47,7 @@ const newBlog = (data = {}) => {
  * 更新博客
  * @param {*} id 
  * @param {*} data 
+ * @returns {Promise}
  */
 const updateBlog = (id, data = {}) => {
   // console.log('updateBlog: ', id, data)
