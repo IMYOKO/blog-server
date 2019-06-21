@@ -1,4 +1,5 @@
 const EXEC = require('../db/mysql')
+
 /**
  * 获取博客列表
  * @param {String} author 
@@ -20,13 +21,10 @@ const getList = (author, keyword) => {
  * @returns {Promise}
  */
 const getDetail = id => {
-  return {
-    id: 1,
-    title: '标题1',
-    content: '内容1',
-    createTime: 1560948103556,
-    author: 'yoko'
-  }
+  let sql = `select * from blogs where id = '${id}';`
+  return EXEC(sql).then(rows => {
+    return rows[0]
+  })
 }
 
 /**
@@ -36,27 +34,55 @@ const getDetail = id => {
  * @param {String} content 
  * @returns {Promise}
  */
-const newBlog = (data = {}) => {
-  // console.log('data: ', data)
-  return {
-    id: 3
-  }
+const newBlog = (option = {}) => {
+  const title = option.title
+  const content = option.content
+  const author = option.author
+  const createtime = Date.now()
+
+  let sql = `insert into blogs (title, content, author, createtime) values ('${title}', '${content}', '${author}', '${createtime}')`
+
+  return EXEC(sql).then(data => {
+    return {
+      id: data.insertId
+    }
+  })
 }
 
 /**
  * 更新博客
- * @param {*} id 
- * @param {*} data 
+ * @param {Number} id 
+ * @param {Object} option 
  * @returns {Promise}
  */
-const updateBlog = (id, data = {}) => {
-  // console.log('updateBlog: ', id, data)
-  return true
+const updateBlog = (id, option = {}) => {
+  let sql = `update blogs set `
+  const arr = Object.keys(option)
+  arr.map((item, index) => {
+    if (index === arr.length -1) {
+      sql += `${item}='${option[item]}' ` 
+    } else {
+      sql += `${item}='${option[item]}', ` 
+    }
+  })
+  sql += `where id='${id}';`
+  return EXEC(sql).then(data => {
+    if (data.affectedRows > 0) {
+      return true
+    }
+    return false
+  })
 }
 
-const deleteBlog = id => {
-  console.log('deleteBlog: ', id)
-  return true
+const deleteBlog = (id, author) => {
+  let sql = `delete from blogs where id = '${id}' and author = '${author}';`
+
+  return EXEC(sql).then(data => {
+    if (data.affectedRows > 0) {
+      return true
+    }
+    return false
+  })
 }
 
 module.exports = {
