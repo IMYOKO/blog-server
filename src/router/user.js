@@ -1,5 +1,6 @@
 const { userlogin, userList, getUser, addUser, updateUser } = require('../controller/user')
 const { SuccessModel, ErrorModel } = require('../model/resModel')
+const REDIS_FN = require('../db/redis')
 
 const handleUserRouter = (req, res) => {
   const method = req.method
@@ -7,17 +8,34 @@ const handleUserRouter = (req, res) => {
   
   // 登录
   if (method === 'POST' && req.path === '/api/user/login') {
+    // const { username, password } = req.query
     const { username, password } = req.body
     const result = userlogin(username, password)
     return result.then(val => {
-      console.log(val)
       if (val.username) {
+        // 设置 session 的值
+        req.session.username = val.username
+        req.session.realname = val.realname
+        // 同步 redis
+        REDIS_FN.SET(req.sessionId, req.session)
+
         return new SuccessModel(val, '登录成功')
       } else {
         return new ErrorModel('登录失败')
       }
     })
   }
+
+  // 登录测试
+  // if (method === 'GET' && req.path === '/api/user/login-test') {
+  //   if (req.session.username) {
+  //     return Promise.resolve(new SuccessModel({
+  //       session: req.session
+  //     }))
+  //   } else {
+  //     return Promise.resolve(new ErrorModel('尚未登录'))
+  //   }
+  // }
 
   // 查询用户列表
   if (method === 'GET' && req.path === '/api/user/list') {
