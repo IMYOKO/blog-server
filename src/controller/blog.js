@@ -52,20 +52,21 @@ const newBlog = (option = {}) => {
 /**
  * 更新博客
  * @param {Number} id 
- * @param {Object} option 
+ * @param {String} title 
+ * @param {String} content 
  * @returns {Promise}
  */
-const updateBlog = (id, option = {}) => {
-  let sql = `update blogs set `
-  const arr = Object.keys(option)
-  arr.map((item, index) => {
-    if (index === arr.length -1) {
-      sql += `${item}='${option[item]}' ` 
-    } else {
-      sql += `${item}='${option[item]}', ` 
-    }
-  })
-  sql += `where id='${id}';`
+const updateBlog = (id, title, content) => {
+  let sql = `update blogs set title='${title}', content='${content}' where id='${id}';`
+  // const arr = Object.keys(option)
+  // arr.map((item, index) => {
+  //   if (index === arr.length -1) {
+  //     sql += `${item}='${option[item]}' ` 
+  //   } else {
+  //     sql += `${item}='${option[item]}', ` 
+  //   }
+  // })
+  // sql += `where id='${id}';`
   return EXEC(sql).then(data => {
     if (data.affectedRows > 0) {
       return true
