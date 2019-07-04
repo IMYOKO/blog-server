@@ -1,4 +1,5 @@
-const EXEC = require('../db/mysql')
+const { EXEC, escape  } = require('../db/mysql')
+const XSS = require('xss')
 
 /**
  * 获取博客列表
@@ -9,7 +10,7 @@ const EXEC = require('../db/mysql')
 const getList = (author, keyword) => {
   let sql = `select * from blogs where 1 = 1 `
   if (author) sql += `and author = '${author}' `
-  if (keyword) sql += `and title like '%${author}%' `
+  if (keyword) sql += `and title like '%${keyword}%' `
   sql += `order by createtime desc;`
 
   return EXEC(sql)
@@ -21,7 +22,8 @@ const getList = (author, keyword) => {
  * @returns {Promise}
  */
 const getDetail = id => {
-  let sql = `select * from blogs where id = '${id}';`
+  id = escape(id)
+  let sql = `select * from blogs where id = ${id};`
   return EXEC(sql).then(rows => {
     return rows[0]
   })
@@ -35,8 +37,8 @@ const getDetail = id => {
  * @returns {Promise}
  */
 const newBlog = (option = {}) => {
-  const title = option.title
-  const content = option.content
+  const title = XSS(option.title)
+  const content = XSS(option.content)
   const author = option.author
   const createtime = Date.now()
 
@@ -57,16 +59,7 @@ const newBlog = (option = {}) => {
  * @returns {Promise}
  */
 const updateBlog = (id, title, content) => {
-  let sql = `update blogs set title='${title}', content='${content}' where id='${id}';`
-  // const arr = Object.keys(option)
-  // arr.map((item, index) => {
-  //   if (index === arr.length -1) {
-  //     sql += `${item}='${option[item]}' ` 
-  //   } else {
-  //     sql += `${item}='${option[item]}', ` 
-  //   }
-  // })
-  // sql += `where id='${id}';`
+  let sql = `update blogs set title='${XSS(title)}', content='${XSS(content)}' where id='${id}';`
   return EXEC(sql).then(data => {
     if (data.affectedRows > 0) {
       return true

@@ -2,13 +2,6 @@ const { userlogin, userList, getUser, addUser, updateUser } = require('../contro
 const { SuccessModel, ErrorModel } = require('../model/resModel')
 const REDIS_FN = require('../db/redis')
 
-// 设置 cookie 的过期时间
-const getCookieExpires = () => {
-  const d = new Date()
-  d.setTime(d.getTime() + (24 * 60 * 60 * 1000))
-  return d.toGMTString()
-}
-
 const handleUserRouter = (req, res) => {
   const method = req.method
   const id = req.query.id
@@ -23,7 +16,7 @@ const handleUserRouter = (req, res) => {
         // 设置 session 的值
         req.session.username = val.username
         req.session.realname = val.realname
-        res.setHeader('Set-cookie', `userId=${val.id}; path=/; httpOnly; expires=${getCookieExpires()}`)
+
         // 同步 redis
         REDIS_FN.SET(req.sessionId, req.session)
 
@@ -33,6 +26,15 @@ const handleUserRouter = (req, res) => {
         return new ErrorModel('登录失败')
       }
     })
+  }
+
+  //  退出登录
+  if (method === 'POST' && req.path === '/api/user/logout') {
+    REDIS_FN.SET(req.sessionId, {})
+    res.setHeader('Set-cookie', `userId=; path=/; httpOnly; expires=''`);
+    return Promise.resolve(
+      new SuccessModel(true, '退出登录成功')
+    )
   }
 
   // 登录测试

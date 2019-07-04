@@ -12,7 +12,7 @@ MYSQL_CONNECTION.connect()
  * @param {SQL} sql 
  * @returns {Promise}
  */
-const exec = sql => {
+const EXEC = sql => {
   const promise = new Promise((reslove, reject) => {
     MYSQL_CONNECTION.query(sql, (err, result) => {
       if (err) {
@@ -25,4 +25,7 @@ const exec = sql => {
   return promise
 }
 
-module.exports = exec
+module.exports = {
+  EXEC,
+  escape: MYSQL.escape // 防sql注入
+}

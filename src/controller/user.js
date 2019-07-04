@@ -1,4 +1,5 @@
-const EXEC = require('../db/mysql')
+const { EXEC, escape } = require('../db/mysql')
+const { genPassword } = require('../utils/cryp')
 
 /**
  * 登录
@@ -6,7 +7,14 @@ const EXEC = require('../db/mysql')
  * @param {String} password 
  */
 const userlogin = (username, password) => {
-  let sql = `select id, username, realname from users where username = '${username}' and password = '${password}';`
+  username = escape(username)
+
+  // 生成加密密码
+  password = genPassword(password)
+  // console.log(password)
+  password = escape(password)
+  let sql = `select id, username, realname from users where username = ${username} and password = ${password};`
+  // console.log(sql)
   return EXEC(sql).then(rows => {
     return rows[0] || {}
   })
@@ -41,7 +49,7 @@ const getUser = id => {
  * @returns {Promise}
  */
 const addUser = (username, password, realname) => {
-  let sql = `insert into users (username, password, realname) values ('${username}', '${password}', '${realname}');`
+  let sql = `insert into users (username, password, realname) values (${escape(username)}, ${escape(genPassword(password))}, ${escape(realname)});`
   return EXEC(sql).then(data => {
     return {
       id: data.insertId
